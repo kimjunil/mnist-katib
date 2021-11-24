@@ -8,6 +8,7 @@ import dvc.api
 def train():
     print("TensorFlow version: ", tf.__version__)
     parser = argparse.ArgumentParser()
+    parser.add_argument('--units', default=128, type=float)
     parser.add_argument('--learning_rate', default=0.01, type=float)
     parser.add_argument('--dropout', default=0.2, type=float)
     parser.add_argument('--epochs', default=5, type=int)
@@ -28,7 +29,7 @@ def train():
     
     model = tf.keras.models.Sequential([
       tf.keras.layers.Flatten(input_shape=(28, 28)),
-      tf.keras.layers.Dense(128, activation='relu'),
+      tf.keras.layers.Dense(args.units, activation='relu'),
       tf.keras.layers.Dropout(args.dropout),
       tf.keras.layers.Dense(10, activation='softmax')
     ])
