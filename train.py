@@ -36,8 +36,9 @@ def train():
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
     print("Training...")
-    training_history = model.fit(train_x, train_y, epochs=5, validation_data=(test_x, test_y))
-    print("Average test loss: ", np.average(training_history.history['loss']))
+    training_history = model.fit(train_x, train_y, epochs=5, validation_split=0.2)
+    loss, acc = model.evaluate(test_x, test_y)
+    print(f"test-loss={loss:.4f} test-acc={acc:.4f}")
 
 if __name__ == '__main__':
     train()
