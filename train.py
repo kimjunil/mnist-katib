@@ -1,8 +1,6 @@
 from typing import get_args
 import tensorflow as tf
 import argparse
-from utils import send_message_to_slack
-from utils import request_deploy_api
 import numpy as np
 import dvc.api
 
