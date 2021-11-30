@@ -37,13 +37,13 @@ def train():
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
     print("Training...")
-    training_history = model.fit(train_x, train_y, epochs=5)
+    training_history = model.fit(train_x, train_y, validation_split=0.2, epochs=5)
     loss, acc = model.evaluate(test_x, test_y)
 
-    print("Training-Accuracy={}".format(training_history.history['accuracy'][-1]))
-    print("Training-Loss={}".format(training_history.history['loss'][-1]))
-    print("Validation-Accuracy={}".format(acc))
-    print("Validation-Loss={}".format(loss))
+    # print("Training-Accuracy={}".format(training_history.history['accuracy'][-1]))
+    # print("Training-Loss={}".format(training_history.history['loss'][-1]))
+    # print("Validation-Accuracy={}".format(acc))
+    # print("Validation-Loss={}".format(loss))
 
 if __name__ == '__main__':
     train()
