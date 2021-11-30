@@ -40,8 +40,8 @@ def train():
     training_history = model.fit(train_x, train_y, epochs=5)
     loss, acc = model.evaluate(test_x, test_y)
 
-    print("Training-Accuracy={}".format(training_history.history['accuracy']))
-    print("Training-Loss={}".format(training_history.history['loss']))
+    print("Training-Accuracy={}".format(training_history.history['accuracy'][-1]))
+    print("Training-Loss={}".format(training_history.history['loss'][-1]))
     print("Validation-Accuracy={}".format(acc))
     print("Validation-Loss={}".format(loss))
 
