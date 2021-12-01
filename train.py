@@ -14,16 +14,17 @@ def train():
     parser.add_argument('--epochs', default=5, type=int)
     args = parser.parse_args()
     
-    with dvc.api.open(
-        'data/dataset.npz',
-        repo='https://github.com/ssuwani/dvc-tutorial',
-        mode="rb"
-    ) as fd:
-        dataset = np.load(fd)
-        train_x = dataset["train_x"]
-        train_y = dataset["train_y"]
-        test_x = dataset["test_x"]
-        test_y = dataset["test_y"]
+    # with dvc.api.open(
+    #     'data/dataset.npz',
+    #     repo='https://github.com/ssuwani/dvc-tutorial',
+    #     mode="rb"
+    # ) as fd:
+    #     dataset = np.load(fd)
+    #     train_x = dataset["train_x"]
+    #     train_y = dataset["train_y"]
+    #     test_x = dataset["test_x"]
+    #     test_y = dataset["test_y"]
+    (train_x, train_y), (test_x, test_y) = tf.keras.datasets.mnist.load_data()
 
     train_x, test_x = train_x / 255.0, test_x / 255.0
     
