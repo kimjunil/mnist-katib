@@ -34,7 +34,7 @@ jobs:
         registry: ghcr.io
         dockerfile: Dockerfile
         directory: .
-        buildArgs: --units, ${{ github.event.inputs.units }}, --learning_rate, ${{ github.event.inputs.learning_rate }}, --dropout, ${{ github.event.inputs.dropout }}, --epochs, ${{ github.event.inputs.epochs }}
+        buildArgs: GCS_BUCKET_ARG=${{ secrets.GCS_BUCKET }}
         username: ${{ github.repository_owner }}
         password: ${{ secrets.PACKAGE_REGISTRY_ACCESS_TOKEN}}
         addLatest: true
