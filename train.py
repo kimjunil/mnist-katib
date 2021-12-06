@@ -6,7 +6,6 @@ import numpy as np
 import dvc.api
 import os
 from tensorflow.python.lib.io import file_io
-from utils import send_message_to_slack
 import datetime
 
 def get_args():
