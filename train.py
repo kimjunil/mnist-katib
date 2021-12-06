@@ -66,15 +66,17 @@ def arg_to_str(args):
   return "_".join([f"{x[0]}_{x[1]}" for x in vars(args).items()][:-1])
 
 def deploy_model(model, args):
-  gcp_bucket = "gs://kimnjang_model"#os.getenv("GCS_BUCKET")
+  gcp_bucket = os.getenv("GCS_BUCKET")
   bucket_path = os.path.join(gcp_bucket, "mnist")
   save_path = f"{arg_to_str(args)}.h5"
+  print(f"saving model {save_path}")
   model.save(save_path)
 
   gs_path = os.path.join(bucket_path, save_path)
   with file_io.FileIO(save_path, mode='rb') as input_file:
     with file_io.FileIO(gs_path, mode='wb+') as output_file:
       output_file.write(input_file.read())
+  print(f"model save success!")
 
   # slack_url = os.getenv("WEB_HOOK_URL")
   # if slack_url != None:
