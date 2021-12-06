@@ -1,5 +1,8 @@
 FROM tensorflow/tensorflow
 
+ARG GCS_BUCKET_ARG
+ENV GCS_BUCKET=${GCS_BUCKET_ARG}
+
 RUN apt-get -y update
 RUN apt-get -y install git
 RUN /usr/bin/python3 -m pip install --upgrade pip
