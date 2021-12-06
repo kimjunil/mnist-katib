@@ -60,14 +60,14 @@ def train():
     training_history = model.fit(train_x, train_y, validation_split=0.2, epochs=args.epochs)
     
     if args.dropout:
-      deploy_model(model)
+      deploy_model(model, args)
 
-def arg_to_str():
-  return "_".join([f"{x[0]}_{x[1]}" for x in vars(args).items()])
+def arg_to_str(args):
+  return "_".join([f"{x[0]}_{x[1]}" for x in vars(args).items()][:-1])
 
 def deploy_model(model, args):
-  gcp_bucket = os.getenv("GCS_BUCKET")
-  bucket_path = os.path.join(gcp_bucket, "mnist_model")
+  gcp_bucket = "gs://kimnjang_model"#os.getenv("GCS_BUCKET")
+  bucket_path = os.path.join(gcp_bucket, "mnist")
   save_path = f"{arg_to_str(args)}.h5"
   model.save(save_path)
 
