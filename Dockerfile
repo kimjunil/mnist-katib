@@ -14,7 +14,7 @@ RUN mkdir -p /app
 ADD train.py /app/
 
 # Sets up the entry point to invoke the trainer.
-ENTRYPOINT ["python", "/app/mnist.py"]
+ENTRYPOINT ["python", "app/train.py"]
 # FROM tensorflow/tensorflow
 
 # ADD train.py /
