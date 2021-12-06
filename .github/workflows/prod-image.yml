@@ -39,21 +39,21 @@ jobs:
         password: ${{ secrets.PACKAGE_REGISTRY_ACCESS_TOKEN}}
         addLatest: true
 
-    # - name: Setup Kustomize
-    #   uses: imranismail/setup-kustomize@v1
+    - name: Setup Kustomize
+      uses: imranismail/setup-kustomize@v1
       
-    # - name: Checkout mlops_mnist_config
-    #   uses: actions/checkout@v2
-    #   with:
-    #     token: ${{ secrets.PACKAGE_REGISTRY_ACCESS_TOKEN}}
-    #     repository: kimjunil/mnist-argocd-katib
-    #     path: mnist-argocd-katib
-    # - name: Set new image tag
-    #   run: |
-    #     cd mnist-argocd-katib/overlays/prod
-    #     kustomize edit set image ghcr.io/kimjunil/mnist_classifier_katib:${{ env.RELEASE_VERSION }}
-    #     git config --global user.name ${{ github.repository_owner }}
-    #     git config --global user.email "iam@junil.kim"
-    #     git commit -am 'Publish new version ${{ env.RELEASE_VERSION }} to dev'
-    #     git push || echo 'no changes'
+    - name: Checkout mlops_mnist_config
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PACKAGE_REGISTRY_ACCESS_TOKEN}}
+        repository: kimjunil/mnist-argocd-katib
+        path: mnist-argocd-katib
+    - name: Set new image tag
+      run: |
+        cd mnist-argocd-katib/overlays/prod
+        kustomize edit set image ghcr.io/kimjunil/mnist_classifier_katib_deploy:${{ env.RELEASE_VERSION }}
+        git config --global user.name ${{ github.repository_owner }}
+        git config --global user.email "iam@junil.kim"
+        git commit -am 'Publish new version ${{ env.RELEASE_VERSION }} to dev'
+        git push || echo 'no changes'
       
