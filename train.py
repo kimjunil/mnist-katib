@@ -1,19 +1,25 @@
+from json import load
 from typing import get_args
 import tensorflow as tf
 import argparse
 import numpy as np
 import dvc.api
+import os
+from tensorflow.python.lib.io import file_io
+from utils import send_message_to_slack
+import datetime
 
-
-def train():
-    print("TensorFlow version: ", tf.__version__)
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--units', default=128, type=float)
     parser.add_argument('--learning_rate', default=0.01, type=float)
     parser.add_argument('--dropout', default=0.2, type=float)
     parser.add_argument('--epochs', default=5, type=int)
-    args = parser.parse_args()
-    
+    parser.add_argument('--deploy', default=False, type=bool)
+    return parser.parse_args()
+  
+
+def load_data():
     # with dvc.api.open(
     #     'data/dataset.npz',
     #     repo='https://github.com/ssuwani/dvc-tutorial',
@@ -24,63 +30,55 @@ def train():
     #     train_y = dataset["train_y"]
     #     test_x = dataset["test_x"]
     #     test_y = dataset["test_y"]
-    (train_x, train_y), (test_x, test_y) = tf.keras.datasets.mnist.load_data()
+    # return (train_x, train_y), (test_x, test_y)
+    return tf.keras.datasets.mnist.load_data()
 
-    train_x, test_x = train_x / 255.0, test_x / 255.0
-    
-    model = tf.keras.models.Sequential([
+def normalize(data):
+  return data / 225.0
+
+def get_model(args):
+  model = tf.keras.models.Sequential([
       tf.keras.layers.Flatten(input_shape=(28, 28)),
       tf.keras.layers.Dense(args.units, activation='relu'),
       tf.keras.layers.Dropout(args.dropout),
       tf.keras.layers.Dense(10, activation='softmax')
     ])
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=args.learning_rate),
+  model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=args.learning_rate),
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
+  return model
+
+def train():
+
+    args = get_args()
+    model = get_model(args)
+    
+    (train_x, train_y), (test_x, test_y) = load_data()
+    train_x, test_x = normalize(train_x), normalize(test_x)
+    
     print("Training...")
     training_history = model.fit(train_x, train_y, validation_split=0.2, epochs=args.epochs)
-    # loss, acc = model.evaluate(test_x, test_y)
+    
+    if args.dropout:
+      deploy_model(model)
 
-    # print("Training-Accuracy={}".format(training_history.history['accuracy'][-1]))
-    # print("Training-Loss={}".format(training_history.history['loss'][-1]))
-    # print("Validation-Accuracy={}".format(acc))
-    # print("Validation-Loss={}".format(loss))
+def arg_to_str():
+  return "_".join([f"{x[0]}_{x[1]}" for x in vars(args).items()])
+
+def deploy_model(model, args):
+  gcp_bucket = os.getenv("GCS_BUCKET")
+  bucket_path = os.path.join(gcp_bucket, "mnist_model")
+  save_path = f"{arg_to_str(args)}.h5"
+  model.save(save_path)
+
+  gs_path = os.path.join(bucket_path, save_path)
+  with file_io.FileIO(save_path, mode='rb') as input_file:
+    with file_io.FileIO(gs_path, mode='wb+') as output_file:
+      output_file.write(input_file.read())
+
+  # slack_url = os.getenv("WEB_HOOK_URL")
+  # if slack_url != None:
+  #     send_message_to_slack(slack_url, acc, loss, training_time, gs_path)
 
 if __name__ == '__main__':
     train()
-
-# import tensorflow as tf
-# from tensorflow.keras import layers, Input, Model
-# import argparse
-
-
-# def get_args():
-#     parser = argparse.ArgumentParser()
-
-#     parser.add_argument("--hidden_units", type=int, required=True)
-#     args = parser.parse_args()
-#     return args
-
-
-# def train(hidden_units):
-#     (train_x, train_y), (test_x, test_y) = tf.keras.datasets.mnist.load_data()
-#     train_x = train_x / 255.0
-#     test_x = test_x / 255.0
-
-#     inputs = Input(shape=(28, 28))
-#     x = layers.Flatten()(inputs)
-#     x = layers.Dense(hidden_units, activation="relu")(x)
-#     outputs = layers.Dense(10, activation="softmax")(x)
-
-#     model = Model(inputs, outputs)
-#     model.compile(
-#         optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["acc"]
-#     )
-#     model.fit(train_x, train_y, epochs=3, validation_split=0.2)
-#     loss, acc = model.evaluate(test_x, test_y)
-#     print(f"model test-loss={loss:.4f} test-acc={acc:.4f}")
-
-
-# if __name__ == "__main__":
-#     args = get_args()
-#     train(args.hidden_units)
