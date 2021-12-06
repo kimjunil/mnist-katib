@@ -1,0 +1,59 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+      units:
+        required: true
+      learning_rate:
+        required: true
+      dropout:
+        required: true
+      epochs:
+        required: true
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: |
+        echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+    - name: Docker Build & Push Action
+      uses: mr-smithers-excellent/docker-build-push@v5.6
+      with:
+        image: mnist_classifier_katib_deploy
+        tags: ${{ env.RELEASE_VERSION }}
+        registry: ghcr.io
+        dockerfile: Dockerfile
+        directory: .
+        buildArgs: --units, ${{ github.event.inputs.units }}, --learning_rate, ${{ github.event.inputs.learning_rate }}, --dropout, ${{ github.event.inputs.dropout }}, --epochs, ${{ github.event.inputs.epochs }}
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.PACKAGE_REGISTRY_ACCESS_TOKEN}}
+        addLatest: true
+
+    # - name: Setup Kustomize
+    #   uses: imranismail/setup-kustomize@v1
+      
+    # - name: Checkout mlops_mnist_config
+    #   uses: actions/checkout@v2
+    #   with:
+    #     token: ${{ secrets.PACKAGE_REGISTRY_ACCESS_TOKEN}}
+    #     repository: kimjunil/mnist-argocd-katib
+    #     path: mnist-argocd-katib
+    # - name: Set new image tag
+    #   run: |
+    #     cd mnist-argocd-katib/overlays/prod
+    #     kustomize edit set image ghcr.io/kimjunil/mnist_classifier_katib:${{ env.RELEASE_VERSION }}
+    #     git config --global user.name ${{ github.repository_owner }}
+    #     git config --global user.email "iam@junil.kim"
+    #     git commit -am 'Publish new version ${{ env.RELEASE_VERSION }} to dev'
+    #     git push || echo 'no changes'
+      
